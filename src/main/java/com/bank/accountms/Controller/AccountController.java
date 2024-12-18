@@ -4,6 +4,8 @@ import com.bank.accountms.Model.Account;
 import com.bank.accountms.Model.UserDTO;
 import com.bank.accountms.Services.AccountServiceImpl;
 import lombok.AllArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -23,7 +25,7 @@ import java.util.Optional;
 
 @Component
 public class AccountController {
-
+    private static final Logger logger = LogManager.getLogger(AccountController.class);
     @Autowired
     private final AccountServiceImpl accServiceImpl;
 
@@ -99,5 +101,10 @@ public class AccountController {
                 user_id,account_id,account),HttpStatus.OK);
     }
 
-
+    @ExceptionHandler
+    public ResponseEntity<String> respondWithError(Exception e){
+        //logger.error("Exception Occurred. Details : {}", e.getMessage());
+        return new ResponseEntity<>("Exception Occurred. More Info :"
+                + e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 }
