@@ -7,9 +7,9 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class UserDTO {
+public class UserProfileDTO {
 
-    private Long user_id;
+    private Long userId;
     private String username;
     private String password_hash;
     private String email;

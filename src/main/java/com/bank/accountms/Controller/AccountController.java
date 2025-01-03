@@ -1,7 +1,8 @@
 package com.bank.accountms.Controller;
 
 import com.bank.accountms.Model.Account;
-import com.bank.accountms.Model.UserDTO;
+import com.bank.accountms.Model.UserProfileDTO;
+import com.bank.accountms.Model.UserProfileDTO;
 import com.bank.accountms.Services.AccountServiceImpl;
 import lombok.AllArgsConstructor;
 import org.apache.logging.log4j.LogManager;
@@ -23,7 +24,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/accounts")
 
-@Component
+
 public class AccountController {
     private static final Logger logger = LogManager.getLogger(AccountController.class);
     @Autowired
@@ -34,16 +35,22 @@ public class AccountController {
 
     @Value("${user.microservice.url}")
     private final String USER_MICROSERVICE_URL;
-
+    @Autowired
     public AccountController(AccountServiceImpl accServiceImpl,
                              @Value("${user.microservice.url}") String userMicroserviceUrl) {
         this.accServiceImpl = accServiceImpl;
+       // this.userDto = userDto;
         this.USER_MICROSERVICE_URL = userMicroserviceUrl;
+    }
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("Accountms is healthy");
     }
 
     @PostMapping("/new")
     private ResponseEntity<Account> createNewAccount(@RequestBody Account account)
     {
+
         boolean isValid=checkIfUserExists(account.getUserId());
         if(!isValid) {
             throw new RuntimeException("user not found with id: " + account.getUserId());
@@ -55,7 +62,7 @@ public class AccountController {
 
         try {
             String url = this.USER_MICROSERVICE_URL +"/"+ userId;
-            ResponseEntity<UserDTO> response = restTemplate.exchange(url, HttpMethod.GET, null, UserDTO.class);
+            ResponseEntity<UserProfileDTO> response = restTemplate.exchange(url, HttpMethod.GET, null, UserProfileDTO.class);
             return response.getStatusCode() == HttpStatus.OK;
         } catch (HttpClientErrorException | HttpServerErrorException e)
         {
@@ -63,22 +70,24 @@ public class AccountController {
         }
     }
 
-    @GetMapping("/account/{id}")
-    private ResponseEntity<Account> getAccById(@PathVariable Long id)
+    @GetMapping("/account/{accountId}")
+    private ResponseEntity<Account> getAccById(@PathVariable Long accountId)
     {
-        return new ResponseEntity<>(accServiceImpl.getAccountById(id),HttpStatus.OK);
+        return new ResponseEntity<>(accServiceImpl.getAccountById(accountId),HttpStatus.OK);
     }
 
-    @GetMapping("/{user_id}/account")
-    private ResponseEntity<Account> getAccByUserId(@PathVariable Long user_id)
+    @GetMapping("/{userId}/account")
+    private ResponseEntity<Account> getAccByUserId(@PathVariable Long userId)
     {
-        return new ResponseEntity<>(accServiceImpl.getAccountsByUserId(user_id),HttpStatus.OK);
+        return new ResponseEntity<>(accServiceImpl.getAccountsByUserId(userId),HttpStatus.OK);
     }
 
     @GetMapping
     private ResponseEntity<List<Account>> getAcc()
     {
-        return new ResponseEntity<>(accServiceImpl.getAccounts(),HttpStatus.OK);
+        List<Account> accounts=accServiceImpl.getAccounts();
+        return accounts.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(accounts);
+        //return new ResponseEntity<>(accServiceImpl.getAccounts(),HttpStatus.OK);
     }
     @PatchMapping("/{accountId}")
     private  ResponseEntity<Account> updateAccountById(@PathVariable Long accountId,@RequestBody Account account)
@@ -92,19 +101,28 @@ public class AccountController {
         }
     }
 
-    @PutMapping("/userid={user_id}/accountid={account_id}")
-    private ResponseEntity<Account> updateByUser_Acc_Id(@PathVariable Long user_id,
-                                                        @PathVariable Long account_id,
+    @PutMapping("/userid={userId}/accountid={accountId}")
+    private ResponseEntity<Account> updateByUser_Acc_Id(@PathVariable Long userId,
+                                                        @PathVariable Long accountId,
                                                         @RequestBody Account account)
     {
         return new ResponseEntity<>(accServiceImpl.updateAccountByAcc_User_id(
-                user_id,account_id,account),HttpStatus.OK);
+                userId,accountId,account),HttpStatus.OK);
+    }
+    @DeleteMapping("/account/{accountId}")
+    public ResponseEntity<String> deleteAcc(@PathVariable Long accountId)
+    {
+        boolean isDeleted = accServiceImpl.deleteAccByAccId(accountId);
+        return isDeleted ? ResponseEntity.ok("Account deleted successfully.") :
+                ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found for id: "+accountId);
     }
 
     @ExceptionHandler
     public ResponseEntity<String> respondWithError(Exception e){
-        //logger.error("Exception Occurred. Details : {}", e.getMessage());
+        logger.error("Exception Occurred. Details : {}", e.getMessage());
         return new ResponseEntity<>("Exception Occurred. More Info :"
                 + e.getMessage(), HttpStatus.BAD_REQUEST);
     }
+
+
 }

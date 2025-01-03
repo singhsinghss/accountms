@@ -6,7 +6,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-@ComponentScan(basePackages = "com.bank.accountms")
+//@ComponentScan(basePackages = "com.bank.accountms")
 @EnableJpaRepositories(basePackages = "com.bank.accountms.Repositories")
 public class AccountmsApplication {
 

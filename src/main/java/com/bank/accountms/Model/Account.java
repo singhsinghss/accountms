@@ -18,17 +18,17 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="account_id")
     private Long accountId;
-    /*@ManyToOne
-    @JoinColumn(name="user_id",referencedColumnName = "user_id")*/
-    @Column(name = "user_id")
+    @Column(name="user_id")
     private Long userId;
     private String account_number;
     private String account_type;
-
-    private Double balance;
+    private BigDecimal balance;
     private String currency_type;
+    //private BigDecimal transaction_limit;
     //@Column(name="created_at")
     private LocalDateTime created_at;
+
+
 
     @PrePersist
     public void prePersist()

@@ -1,6 +1,7 @@
 package com.bank.accountms.Services;
 
 import com.bank.accountms.Model.Account;
+import com.bank.accountms.Model.UserProfileDTO;
 import com.bank.accountms.Repositories.AccountRepository;
 import com.bank.accountms.Services.Interfaces.AccountService;
 import lombok.AllArgsConstructor;
@@ -12,11 +13,15 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@AllArgsConstructor
+
 @Component
 public class AccountServiceImpl implements AccountService {
     @Autowired
     private final AccountRepository accountRepository;
+
+    public AccountServiceImpl(AccountRepository accountRepository) {
+        this.accountRepository = accountRepository;
+    }
 
 
     @Override
@@ -38,15 +43,15 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Account getAccountById(Long id) {
-        Optional<Account> accountId=accountRepository.findById(id);
-        if(accountId.isPresent())
+    public Account getAccountById(Long accountId) {
+        Optional<Account> account_Id=accountRepository.findById(accountId);
+        if(account_Id.isPresent())
         {
-            return accountId.get();
+            return account_Id.get();
         }
         else
         {
-            throw new RuntimeException("Account not found with account id: "+id);
+            throw new RuntimeException("Account not found with account id: "+accountId);
         }
     }
 
@@ -57,7 +62,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account partialUpdateAccount(Long accountId, Account account) {
-        Optional<Account> existingAccId=accountRepository.findById(accountId);
+        Optional<Account> existingAccId=accountRepository.findByAccountId(accountId);
         if(existingAccId.isPresent())
         {
             Account acc=existingAccId.get();
@@ -71,6 +76,10 @@ public class AccountServiceImpl implements AccountService {
             if(account.getCurrency_type()!=null) {
                 acc.setCurrency_type(account.getCurrency_type());
             }
+           /* if(account.getTransaction_limit()!=null)
+            {
+                acc.setTransaction_limit(account.getTransaction_limit());
+            }*/
             //acc.setCreatedAt(LocalDateTime.now());
             return accountRepository.save(acc);
         }
@@ -81,10 +90,10 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Account updateAccountByAcc_User_id(Long user_id,Long acc_id,Account account) {
-        Account existingAccount = accountRepository.findById(acc_id)
+    public Account updateAccountByAcc_User_id(Long userId,Long accountId,Account account) {
+        Account existingAccount = accountRepository.findByAccountId(accountId)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
-        Account existingUser=accountRepository.findById(user_id)
+        Account existingUser=accountRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("User id not found"));
         existingAccount.setAccount_type(account.getAccount_type());
         System.out.println(account.getAccount_type());
@@ -92,6 +101,18 @@ public class AccountServiceImpl implements AccountService {
         System.out.println(account.getBalance());
         existingAccount.setCurrency_type(account.getCurrency_type());
         return accountRepository.save(existingAccount);
+
+
+    }
+
+    @Override
+    public boolean deleteAccByAccId(Long accountId) {
+        Optional<Account> account = accountRepository.findByAccountId(accountId);
+        if (account.isEmpty()) {
+            throw new RuntimeException("Account not found for accountId: " + accountId);
+        }
+        accountRepository.deleteById(accountId);
+        return true;
 
     }
 
