@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.antlr.v4.runtime.misc.NotNull;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,13 +25,12 @@ public class Account {
     private String account_type;
     private BigDecimal balance;
     private String currency_type;
-    //private BigDecimal transaction_limit;
-    //@Column(name="created_at")
+    @CreationTimestamp
     private LocalDateTime created_at;
 
 
 
-    @PrePersist
+    //@PrePersist
     public void prePersist()
     {
         LocalDateTime currentDateTime=LocalDateTime.now();

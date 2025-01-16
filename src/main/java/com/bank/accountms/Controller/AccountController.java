@@ -87,7 +87,7 @@ public class AccountController {
     {
         List<Account> accounts=accServiceImpl.getAccounts();
         return accounts.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(accounts);
-        //return new ResponseEntity<>(accServiceImpl.getAccounts(),HttpStatus.OK);
+
     }
     @PatchMapping("/{accountId}")
     private  ResponseEntity<Account> updateAccountById(@PathVariable Long accountId,@RequestBody Account account)

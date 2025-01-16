@@ -1,12 +1,12 @@
 package com.bank.accountms.Model;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
+@Data
 public class UserProfileDTO {
 
     private Long userId;
@@ -16,7 +16,6 @@ public class UserProfileDTO {
     private String phone_number;
     private boolean two_factor_enabled;
     private String kyc_status;
-    private LocalDateTime created_at;
-    private LocalDateTime updated_at;
+
 
 }
